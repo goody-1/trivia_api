@@ -420,5 +420,5 @@ Create a new question. The new question must have all four information.
 ```
 
 #	Author and Acknowledgement
-Goodness Atunde contributed to the API, implementing the TODOS(__init.py__), test file(test_flaskr.py), edited some urls in the frontend and this ReadMe file.
+Goodness Atunde contributed to the API, implementing the todos in (__init.py__), test file(test_flaskr.py), edited some urls in the frontend and this ReadMe file.
 The project and other files are credicted to [Udacity](https://www.udacity.com/)
