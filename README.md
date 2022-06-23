@@ -196,7 +196,7 @@ python test_flaskr.py
 }
 ```
 
-> **DELETE '/questions/<int:id>'
+> **DELETE '/questions/<int:id>'**
 
 -	Delete the question that was specified by its id in the url parameter.
 -	Example: `curl -X DELETE http://127.0.0.1:5000/questions/59`
