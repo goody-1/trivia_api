@@ -47,7 +47,7 @@ def create_app(test_config=None):
 
 
     """
-    @TODO:
+    @Done:
     Create an endpoint to handle GET requests
     for all available categories.
     """
@@ -76,7 +76,8 @@ def create_app(test_config=None):
         # cat_type_list = [dictionary['type'].lower() for dictionary in categories]
         # print(cat_type_list); print(); print()
 
-        questions = Question.query.order_by(Question.id).all()
+        questions = (Question.query.order_by(Question.id).all())
+        random.shuffle(questions)
 
         current_questions = paginate_questions(request, questions)
         # formatted_questions = [question.format() for question in questions]
@@ -224,48 +225,45 @@ def create_app(test_config=None):
     if provided, and that is not one of the previous questions.
     """
     @app.route('/quizzes', methods=['POST'])
-    def get_quizzes():
+    def get_quiz_question():
         # This endpoint should take category and previous question parameters
         try:
             body = request.get_json()
-            # print(body, "\n\n")
-
             previous_questions = body.get('previous_questions', None)
-            # print(previous_questions)
             quiz_category = body.get('quiz_category', None)
-            # print("quiz category", quiz_category)
             category_id = quiz_category['id']
-            # print("category id", category_id)
 
-            if category_id != 0:
+            # If a category is chosen get only questions in that category else, get all questions
+            if category_id:
                 questions = Question.query.filter_by(category=category_id).all()
             else:
                 questions = Question.query.all()
 
+            # Make the next question random
+            next_question = random.choice(questions)
 
-            def get_random_question():
-                question = random.choice(questions).format()
-                return question
+            # If the question is asked
+            asked = False
+            if next_question.id in previous_questions:
+                asked = True
 
-            next_question = get_random_question()
+            # If the question has been asked before, shuffle again
+            while asked:
+                next_question = random.choice(questions)
 
-            used = False
-            if next_question['id'] in previous_questions:
-                used = True
-
-            while used:
-                next_question = random.choice(questions).format()
-
-                if (len(previous_questions) == len(questions)):
+                # If number of asked questions is equal to the number of total question
+                #   either for a category or for all questions then the questions are exhausted
+                if (len(questions) == len(previous_questions)):
                     return jsonify({
                         'success': True,
-                        'message': "Game Over"
+                        'previous_questions': previous_questions,
+                        'final_question': True,
                     }), 200
 
             print(previous_questions, "\n\n")
             return jsonify({
                 'success': True,
-                'question': next_question
+                'question': next_question.format()
             })
 
         except Exception as e:
@@ -274,7 +272,7 @@ def create_app(test_config=None):
 
     """
     @DONE:
-    CreateD error handlers for all expected errors
+    Created error handlers for all expected errors
     including 404 and 422.
     """
 
@@ -296,11 +294,11 @@ def create_app(test_config=None):
 
     @app.errorhandler(500)
     def internal_server(error):
-        return jsonify({
-            'success': False,
-            'error': 500,
-            'message': 'Sorry, the fault is from us not you. Please check after some time'
-        }), 500
+        return jsonify({'success': False, 'error': 500, 'message': 'server error'}), 500
+
+    @app.errorhandler(503)
+    def service_unavailable(error):
+        return jsonify({'success': False, 'error': 503, 'message': 'service not available'}), 503
 
     return app
 
